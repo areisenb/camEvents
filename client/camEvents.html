@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="author" content="Andreas Reisenbauer">
+    <link rel="icon" href="../../favicon.ico">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/bootstrap-table.min.css">
+
+
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js'></script>        
+    <script type='text/javascript' src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/bootstrap-table.min.js"></script>
+    <!-- Latest compiled and minified Locales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.7.0/locale/bootstrap-table-en-US.min.js"></script>
+    <meta name="description" content="Our page to investigate camera events">
+    <title>Camera Events</title>
+    <style>
+      td img{
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      </style>
+  </head>
+
+  <body>
+    <div class="container-fluid">
+
+      <div class="col-lg-3">
+        <table id="eventsTable" data-toggle="table" data-url="/api/camEvents/events" data-striped=true 
+            data-search="true" 
+            data-pagination=true data-page-number=1 data-page-size=10 data-page-list=[10,20,50,100]>
+          <thead>
+            <tr>
+              <th data-field="date" data-formatter="timeFormatter">Zeitstempel</th>
+            </tr>
+          </thead>
+        </table>  
+      </div>
+
+      <div class="col-lg-2">
+        <div id="event-media-toolbar" class="btn-group">
+          <p id='event-media-lbl'class="navbar-text navbar-right"></p>
+        </div> 
+          <table id="eventTableMedia" data-toggle="table" data-striped=true 
+            data-toolbar="#event-media-toolbar" >
+            <thead>
+              <tr>
+                <th data-field="file" data-formatter="imageFormatter">Vorschau</th>
+              </tr>
+            </thead>
+          </table>  
+      </div>
+
+      <div class="col-lg-7">
+        <div id="media-title-toolbar" class="btn-group">
+          <p id='media-title-lbl' class="navbar-text navbar-right"></p>
+        </div> 
+        <div id="media">
+          <img src="" id='media'>
+        </div>
+      </div>
+    </div>
+ 
+    <script>
+    "use strict";
+
+    function pad(num, size) { 
+      return ('000000000' + num).substr(-size); 
+    }
+    
+    function lengthFormatter(value, row, index) {
+      return Math.floor (row.len/60) + ":" + pad (row.len%60, 2);
+    }
+    
+    function timeFormatter(value, row, index) {
+      if (typeof value !== 'undefined') {
+        let d = new Date(value);
+        return d.toLocaleDateString("de-at", {hour:"numeric", minute:"2-digit",second:"2-digit", year:"numeric", month:"2-digit",day:"2-digit"});
+      } else {
+        return '';
+      }
+    }
+
+    function imageFormatter(value, row) {
+      return '<img src="'+value+'" height=64/>';
+    }
+
+    $(function() {
+      $('#eventsTable').on('click-row.bs.table', function (e, row, $element) {
+        console.log("Select eventId: ", row.id);
+        $('#eventTableMedia').bootstrapTable('refresh', {
+                    url: '/api/camEvents/events/' + row.id
+        });
+        $('#event-media-lbl')[0].innerHTML=timeFormatter(row.date, undefined, undefined);
+      });
+      $('#eventTableMedia').on('click-row.bs.table', function (e, row, $element) {
+        console.log("Select Media: ", row.file);
+        $('#media')[0].innerHTML='<image src=' + row.file + " style='height: 100%; width: 100%; object-fit: contain'/>";
+      });
+      
+    });
+    </script>
+
+
+    
+  </body>
+ </html>
