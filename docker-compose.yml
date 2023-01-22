@@ -1,0 +1,12 @@
+---
+version: '3'
+services:
+  camEvents:
+    image: areisenb/rpi-camevents:0.1.0
+    container_name: camevents
+    ports:
+      - 8110:8110
+    network_mode: bridge
+    restart: unless-stopped
+    volumes:
+      - /var/opt/areisenb/camEvents:/usr/src/app/events
